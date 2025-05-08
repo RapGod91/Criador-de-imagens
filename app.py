@@ -3,6 +3,7 @@ from PIL import Image, ImageDraw, ImageFont
 import os
 from io import BytesIO
 import textwrap
+import uuid
 
 app = Flask(__name__)
 
@@ -57,12 +58,11 @@ def create_image_with_text(text):
             # Atualiza a posição y para a próxima linha
             y += font_size + offset
         
-        # Salva a imagem em um buffer de memória
-        img_io = BytesIO()
-        background.save(img_io, 'JPEG')
-        img_io.seek(0)
-        
-        return img_io
+        # Gera um nome único para a imagem
+        filename = f"{uuid.uuid4().hex}.jpg"
+        image_path = os.path.join(UPLOAD_FOLDER, filename)
+        background.save(image_path, 'JPEG')
+        return filename
     except Exception as e:
         print(f"Erro ao criar imagem: {str(e)}")
         return None
@@ -70,15 +70,15 @@ def create_image_with_text(text):
 @app.route('/generate', methods=['POST'])
 def generate_image():
     data = request.get_json()
-    
     if not data or 'text' not in data:
         return jsonify({'error': 'Texto não fornecido'}), 400
-    
+
     text = data['text']
-    img_io = create_image_with_text(text)
-    
-    if img_io:
-        return send_file(img_io, mimetype='image/jpeg')
+    filename = create_image_with_text(text)
+    if filename:
+        # Monta a URL da imagem (ajuste o domínio conforme necessário)
+        image_url = request.host_url + f"static/images/{filename}"
+        return jsonify({'url': image_url})
     else:
         return jsonify({'error': 'Erro ao gerar imagem'}), 500
 
@@ -141,11 +141,10 @@ def home():
                         },
                         body: JSON.stringify({text: text})
                     })
-                    .then(response => response.blob())
-                    .then(blob => {
-                        const imageUrl = URL.createObjectURL(blob);
+                    .then(response => response.json())
+                    .then(data => {
                         const resultDiv = document.getElementById('result');
-                        resultDiv.innerHTML = `<img src="${imageUrl}" style="max-width: 100%;">`;
+                        resultDiv.innerHTML = `<img src="${data.url}" style="max-width: 100%;">`;
                     })
                     .catch(error => {
                         console.error('Erro:', error);
