@@ -33,12 +33,29 @@ def create_image_with_text(text):
             font = ImageFont.load_default()
         
         # Configuração do texto
-        margin = 50  # Margem das bordas
-        offset = 10  # Espaçamento entre linhas
+        margin = 80  # Aumentei a margem para dar mais espaço
+        offset = 15   # Aumentei o espaçamento entre linhas
         max_width = background.width - (2 * margin)  # Largura máxima do texto
         
+        # Calcula quantos caracteres cabem por linha baseado na largura da imagem
+        avg_char_width = font_size * 0.6  # Estimativa aproximada da largura média de um caractere
+        chars_per_line = int(max_width / avg_char_width)
+        
         # Quebra o texto em múltiplas linhas
-        wrapped_text = textwrap.wrap(text, width=30)  # Ajuste o número 30 conforme necessário
+        wrapped_text = textwrap.wrap(text, width=chars_per_line)
+        
+        # Ajusta o tamanho da fonte se o texto for muito grande
+        max_lines = 8  # Número máximo de linhas permitidas
+        if len(wrapped_text) > max_lines:
+            # Reduz o tamanho da fonte proporcionalmente
+            font_size = int(font_size * (max_lines / len(wrapped_text)))
+            try:
+                font = ImageFont.truetype(font_path, font_size)
+            except Exception as e:
+                print(f"Erro ao carregar a fonte ajustada: {e}")
+                font = ImageFont.load_default()
+            # Recalcula o texto com a nova fonte
+            wrapped_text = textwrap.wrap(text, width=chars_per_line)
         
         # Calcula a altura total do texto
         total_height = len(wrapped_text) * (font_size + offset)
