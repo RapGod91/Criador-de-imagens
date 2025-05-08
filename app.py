@@ -24,7 +24,7 @@ def create_image_with_text(text):
         
         # Configura a fonte (ajuste o tamanho conforme necessário)
         font_path = "static/fonts/DejaVuSans.ttf"  # Caminho relativo à raiz do projeto
-        font_size = 100
+        font_size = 35
         try:
             font = ImageFont.truetype(font_path, font_size)
         except Exception as e:
