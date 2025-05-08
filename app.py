@@ -23,7 +23,7 @@ def create_image_with_text(text):
         draw = ImageDraw.Draw(background)
         
         # Configura a fonte (ajuste o tamanho conforme necessário)
-        font_size = 35
+        font_size = 50
         try:
             font = ImageFont.truetype("arial.ttf", font_size)
         except:
